@@ -45,10 +45,13 @@ const wrongMove = (moveToCell) => {
 }
 
 const moveIsPosible = (moveToCell) => {
+  //que este vacia
   if (moveToCell.matches(".empty")) {
     players.forEach(player => {
       player.isMyTurn && moveToCell.classList.replace("empty", player.color)
-    })
+    }) 
+
+    //que este al lado de una ficha del color contratio
     return true
   } else {return false}
 }
@@ -63,8 +66,19 @@ scoreP1.textContent = players[0].score
 scoreP2.textContent = players[1].score
 
 const updateScore = () => {
-  scoreP1.textContent = players[0].score
-  scoreP2.textContent = players[1].score
+  initialBoard.forEach(row => {
+    row.forEach(cell => {
+      if (cell !== 0 ||  3) {
+        cell === 1 ? players[0].score++  //player1 - whites
+        : cell === 2 && players[1].score++ //player2 - blacks
+      }
+    })
+  })
+}
+
+const paintScore = () => {
+  scoreP1$$.textContent = players[0].score
+  scoreP2$$.textContent = players[1].score
 }
 
 
