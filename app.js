@@ -2,9 +2,9 @@ const initialBoard = [
   [3,3,3,3,3,3,3,3,3,3],
   [3,0,0,0,0,0,0,0,0,3],
   [3,0,0,0,0,0,0,0,0,3],
-  [3,0,0,0,0,0,0,0,0,3],
-  [3,0,0,0,1,2,0,0,0,3],
-  [3,0,0,0,2,1,0,0,0,3],
+  [3,0,0,2,0,0,0,0,0,3],
+  [3,0,0,1,1,2,0,0,0,3],
+  [3,0,2,2,2,1,0,0,0,3],
   [3,0,0,0,0,0,0,0,0,3],
   [3,0,0,0,0,0,0,0,0,3],
   [3,0,0,0,0,0,0,0,0,3],
@@ -16,8 +16,8 @@ const initialBoard = [
 // 2 = black
 
 const players = [
-  {ficha: 1, score: 0, color: "white", isMyTurn: true},
-  {ficha: 2, score: 0, color: "black", isMyTurn: false},
+  {ficha: 1, score: 0, color: "white", isMyTurn: false},
+  {ficha: 2, score: 0, color: "black", isMyTurn: true},
 ]
 
 const board$$ = document.querySelector(".board")
@@ -27,8 +27,6 @@ const scoreP1$$ = document.querySelector("#scoreP1")
 const scoreP2$$ = document.querySelector("#scoreP2")
 
 //*SCORE
-scoreP1.textContent = players[0].score
-scoreP2.textContent = players[1].score
 
 const updateScore = () => {
   //reseteamos a 0 el score de los jugadores para contar todo
@@ -49,6 +47,21 @@ const paintScore = () => {
 }
 
 //*TURNS
+const firstTurn = (players) => {
+  players.forEach(player => {
+    if (player.isMyTurn) {
+      const firstTurn = `p${player.ficha}`
+      const color = player.color
+      firstTurn === p1$$ ? p1$$.classList.add("turn", color) : p2$$.classList.add("turn", color)
+
+    } else {
+      const secondTurn = `p${player.ficha}`
+      const color = player.color
+      secondTurn === p1$$ ? p1$$.classList.add(color) : p1$$.classList.add(color)
+    }
+  })
+}
+
 const nextTurn = () => {
   updateScore()
   paintScore()
@@ -70,6 +83,12 @@ const wrongMove = (moveToCell) => {
   }, 100);
 }
 
+const capture = (moveToCell) => {
+  let cellsCaptured = []
+  //comprobar las 8 direcciones         
+  //capturar y dar la vuelta a las fichas
+}
+
 const moveIsPosible = (moveToCell) => {
   //que este vacia
   if (moveToCell.matches(".empty")) {
@@ -86,6 +105,8 @@ const moveIsPosible = (moveToCell) => {
     }) 
 
     //que este al lado de una ficha del color contratio
+
+
     return true
   } else {return false}
 }
@@ -122,5 +143,6 @@ const paintBoard = (boardArray) => {
 }
 
 paintBoard(initialBoard)
+firstTurn(players)
 updateScore()
 paintScore()
