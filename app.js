@@ -20,6 +20,12 @@ const players = [
   {ficha: 2, score: 0, color: "black", isMyTurn: true},
 ]
 
+const directions = [
+  {row: -1, col: -1}, {row: -1, col: 0}, {row: -1, col: +1},
+  {row:  0, col: -1},                    {row:  0, col: +1},
+  {row: +1, col: -1}, {row: +1, col: 0}, {row: +1, col: +1},
+]
+
 const board$$ = document.querySelector(".board")
 const p1$$ = document.querySelector("#p1")
 const p2$$ = document.querySelector("#p2")
@@ -85,8 +91,21 @@ const wrongMove = (moveToCell) => {
 
 const capture = (moveToCell) => {
   let cellsCaptured = []
-  //comprobar las 8 direcciones         
   //capturar y dar la vuelta a las fichas
+}
+
+const checkTokens = (cell) => {
+  //ver en los alrededores de una ficha posibles capturas
+  const surroundings = directions.map(nextCell => {
+    const {row, col} = nextCell
+    const rowCell = cell.id[0]
+    const colCell = cell.id[1]
+    const idRowNextCell = Number(rowCell) + Number(row)
+    const idColNextCell = Number(colCell) + Number(col)
+    const idNextCell = `${idRowNextCell}${idColNextCell}`
+    return idNextCell
+  })
+  console.log(surroundings)
 }
 
 const moveIsPosible = (moveToCell) => {
@@ -105,7 +124,7 @@ const moveIsPosible = (moveToCell) => {
     }) 
 
     //que este al lado de una ficha del color contratio
-
+    checkTokens(moveToCell)
 
     return true
   } else {return false}
