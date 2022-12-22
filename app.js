@@ -15,10 +15,11 @@ const initialBoard = [
 // 1 = white
 // 2 = black
 let board = [...initialBoard]
+let potentialMoves = []
 
 const players = [
-  {ficha: 1, score: 0, color: "white", isMyTurn: false},
-  {ficha: 2, score: 0, color: "black", isMyTurn: true},
+  {token: 1, score: 0, color: "white", isMyTurn: false, oppositeToken: 2},
+  {token: 2, score: 0, color: "black", isMyTurn: true, oppositeToken: 1},
 ]
 
 const directions = [
@@ -57,12 +58,12 @@ const paintScore = () => {
 const firstTurn = (players) => {
   players.forEach(player => {
     if (player.isMyTurn) {
-      const firstTurn = `p${player.ficha}`
+      const firstTurn = `p${player.token}`
       const color = player.color
       firstTurn === p1$$ ? p1$$.classList.add("turn", color) : p2$$.classList.add("turn", color)
 
     } else {
-      const secondTurn = `p${player.ficha}`
+      const secondTurn = `p${player.token}`
       const color = player.color
       secondTurn === p1$$ ? p1$$.classList.add(color) : p1$$.classList.add(color)
     }
@@ -95,22 +96,21 @@ const capture = (moveToCell) => {
   //capturar y dar la vuelta a las fichas
 }
 
-const checkTokens = (cell) => {
-  //ver en los alrededores de una ficha posibles capturas
+const checkTokens = (cell, token) => {
+  //ver en los alrededores de una token posibles capturas
   const surroundings = directions.map(nextCell => {
     const {row, col} = nextCell
     const rowCell = cell.id[0]
     const colCell = cell.id[1]
     const idRowNextCell = Number(rowCell) + Number(row)
     const idColNextCell = Number(colCell) + Number(col)
-    const idNextCell = `${idRowNextCell}${idColNextCell}`
-
     const value = board[idRowNextCell][idColNextCell]
+    const idNextCell = `${idRowNextCell}${idColNextCell}`
 
     return {id: idNextCell, value: value}
   })
-  console.log(surroundings)
-  return surroundings
+  //filtramos solo las posiciones con fichas contrarias como posibles movimientos
+  potentialMoves = surroundings.filter(potentialMove => potentialMove.value === token)
 }
 
 const moveIsPosible = (moveToCell) => {
@@ -118,22 +118,24 @@ const moveIsPosible = (moveToCell) => {
   if (moveToCell.matches(".empty")) {
     players.forEach(player => {
       if (player.isMyTurn) {
+        //que este al lado de un token del color contratio
+        checkTokens(moveToCell, player.oppositeToken)
+        if (potentialMoves.length > 0) {
         //pinta el tablero
         moveToCell.classList.replace("empty", player.color)
-        //modifica el array reflejando la ficha
+        //modifica el array reflejando la token
         const rowCell = moveToCell.id[0]
         const colCell = moveToCell.id[1]
-        board[rowCell][colCell] = player.ficha
+        board[rowCell][colCell] = player.token
         console.log(board)
+        console.log("true pone ficha")
+        return true
+        }
       }
-    }) 
-
-    //que este al lado de una ficha del color contratio
-    checkTokens(moveToCell)
-
-
-    return true
-  } else {return false}
+    })
+  } else {
+    return false
+  }
 }
 
 const move = (e) => {
