@@ -14,6 +14,7 @@ const initialBoard = [
 // 0 = empty
 // 1 = white
 // 2 = black
+let board = [...initialBoard]
 
 const players = [
   {ficha: 1, score: 0, color: "white", isMyTurn: false},
@@ -103,9 +104,13 @@ const checkTokens = (cell) => {
     const idRowNextCell = Number(rowCell) + Number(row)
     const idColNextCell = Number(colCell) + Number(col)
     const idNextCell = `${idRowNextCell}${idColNextCell}`
-    return idNextCell
+
+    const value = board[idRowNextCell][idColNextCell]
+
+    return {id: idNextCell, value: value}
   })
   console.log(surroundings)
+  return surroundings
 }
 
 const moveIsPosible = (moveToCell) => {
@@ -118,13 +123,14 @@ const moveIsPosible = (moveToCell) => {
         //modifica el array reflejando la ficha
         const rowCell = moveToCell.id[0]
         const colCell = moveToCell.id[1]
-        initialBoard[rowCell][colCell] = player.ficha
-        console.log(initialBoard)
+        board[rowCell][colCell] = player.ficha
+        console.log(board)
       }
     }) 
 
     //que este al lado de una ficha del color contratio
     checkTokens(moveToCell)
+
 
     return true
   } else {return false}
