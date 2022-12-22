@@ -1,11 +1,11 @@
 const initialBoard = [
   [3,3,3,3,3,3,3,3,3,3],
   [3,0,0,0,0,0,0,0,0,3],
-  [3,0,0,0,0,0,0,0,0,3],
-  [3,0,0,2,0,0,0,0,0,3],
-  [3,0,0,1,1,2,0,0,0,3],
+  [3,0,0,0,1,0,0,0,0,3],
+  [3,0,0,2,1,0,0,0,0,3],
+  [3,0,0,0,1,2,0,0,0,3],
   [3,0,2,2,2,1,0,0,0,3],
-  [3,0,0,0,0,0,0,0,0,3],
+  [3,0,0,0,0,0,1,0,0,3],
   [3,0,0,0,0,0,0,0,0,3],
   [3,0,0,0,0,0,0,0,0,3],
   [3,3,3,3,3,3,3,3,3,3],
@@ -16,10 +16,11 @@ const initialBoard = [
 // 2 = black
 let board = [...initialBoard]
 let potentialMoves = []
+let tokensCaptured = []
 
 const players = [
-  {token: 1, score: 0, color: "white", isMyTurn: false, oppositeToken: 2},
-  {token: 2, score: 0, color: "black", isMyTurn: true, oppositeToken: 1},
+  {token: 1, score: 0, color: "white", isMyTurn: false, oppositeToken: 2, oppositeColor: "black"},
+  {token: 2, score: 0, color: "black", isMyTurn: true, oppositeToken: 1, oppositeColor: "white"}
 ]
 
 const directions = [
@@ -91,15 +92,42 @@ const wrongMove = (moveToCell) => {
   }, 100);
 }
 
-const capture = (moveToCell) => {
-  let cellsCaptured = []
-  //capturar y dar la vuelta a las fichas
+//con los vectores de direccion sacar la posicion de la siguiente celda
+const idNextCell = (rowDir, colDir, idInitialCell) => {
+  console.log(rowDir, colDir, idInitialCell)
+  const rowInitialCell = idInitialCell[0]
+  const colInitialCell = idInitialCell[1]
+  const rowNextCell =  Number(rowInitialCell) + Number(rowDir)
+  const colNextCell =  Number(colInitialCell) + Number(colDir)
+  const next = [rowNextCell, colNextCell]
+  // console.log( rowInitialCell, colInitialCell, rowNextCell, colNextCell)
+  return next
+}
+
+//capturar y dar la vuelta a las fichas
+const capture = (moveToCell, token, tokenToCapture) => {
+  //ver cuantas fichas se pueden capturar en cada direccion.
+  potentialMoves.map(dir => {
+    let next = idNextCell(dir.direction[0], dir.direction[1], dir.id)
+    const valueNextCell = board[next[0]][next[1]]
+    console.log(valueNextCell)
+    //si la siguiente es del que hace la jugada -> OK -> fin del mapeo -> captura token
+    if (valueNextCell === token) {
+      tokensCaptured = [...tokensCaptured, dir.id]
+    } else if (valueNextCell === tokenToCapture) {
+      
+    } else return false
+  })
+  console.log(tokensCaptured)
+  tokensCaptured.forEach(tkn => {
+     board[tkn[0]][tkn[1]] = token
+  })
 }
 
 const checkTokens = (cell, token) => {
   //ver en los alrededores de una token posibles capturas
   const surroundings = directions.map(nextCell => {
-    const {row, col} = nextCell
+    const {row, col} = nextCell //direction: vectores x e y de la celda contigua
     const rowCell = cell.id[0]
     const colCell = cell.id[1]
     const idRowNextCell = Number(rowCell) + Number(row)
@@ -107,13 +135,15 @@ const checkTokens = (cell, token) => {
     const value = board[idRowNextCell][idColNextCell]
     const idNextCell = `${idRowNextCell}${idColNextCell}`
 
-    return {id: idNextCell, value: value}
+    return {id: idNextCell, value: value, direction: [row, col]}
   })
   //filtramos solo las posiciones con fichas contrarias como posibles movimientos
   potentialMoves = surroundings.filter(potentialMove => potentialMove.value === token)
 }
 
 const moveIsPosible = (moveToCell) => {
+  //iniciamos las capturas a 0
+  tokensCaptured = []
   //que este vacia
   if (moveToCell.matches(".empty")) {
     players.forEach(player => {
@@ -121,19 +151,29 @@ const moveIsPosible = (moveToCell) => {
         //que este al lado de un token del color contratio
         checkTokens(moveToCell, player.oppositeToken)
         if (potentialMoves.length > 0) {
-        //pinta el tablero
-        moveToCell.classList.replace("empty", player.color)
-        //modifica el array reflejando la token
-        const rowCell = moveToCell.id[0]
-        const colCell = moveToCell.id[1]
-        board[rowCell][colCell] = player.token
-        console.log(board)
-        console.log("true pone ficha")
-        return true
+          capture(moveToCell, player.token, player.oppositeToken)
+
+
+          //pinta el tablero el token puesto
+          moveToCell.classList.replace("empty", player.color)
+          //modifica el array reflejando el token
+          const rowCell = moveToCell.id[0]
+          const colCell = moveToCell.id[1]
+          board[rowCell][colCell] = player.token
+          //pintamos en el tablero las capturadas al cabo de un tiempo
+          setTimeout(() => {
+            tokensCaptured.forEach(tkn => {
+              const idElement = document.getElementById(`${tkn}`) 
+              idElement.classList.replace(player.oppositeColor, player.color)
+            })  
+          }, 300);
         }
       }
     })
+    console.log("true: empty and captures")
+    return true
   } else {
+    console.log("false: not empty")
     return false
   }
 }
