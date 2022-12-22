@@ -16,8 +16,8 @@ const initialBoard = [
 // 2 = black
 
 const players = [
-  {player: 1, score: 0, color: "white", isMyTurn: true},
-  {player: 2, score: 0, color: "black", isMyTurn: false},
+  {ficha: 1, score: 0, color: "white", isMyTurn: true},
+  {ficha: 2, score: 0, color: "black", isMyTurn: false},
 ]
 
 const board$$ = document.querySelector(".board")
@@ -26,14 +26,40 @@ const p2$$ = document.querySelector("#p2")
 const scoreP1$$ = document.querySelector("#scoreP1")
 const scoreP2$$ = document.querySelector("#scoreP2")
 
+//*SCORE
+scoreP1.textContent = players[0].score
+scoreP2.textContent = players[1].score
+
+const updateScore = () => {
+  //reseteamos a 0 el score de los jugadores para contar todo
+  players[0].score = 0
+  players[1].score = 0
+
+  initialBoard.forEach(row => {
+    row.forEach(cell => {
+        cell === 1 ? players[0].score++  //player1 - whites
+        : cell === 2 && players[1].score++ //player2 - blacks
+    })
+  })
+}
+
+const paintScore = () => {
+  scoreP1$$.textContent = players[0].score
+  scoreP2$$.textContent = players[1].score
+}
+
 //*TURNS
 const nextTurn = () => {
+  updateScore()
+  paintScore()
+
   players[0].isMyTurn = !players[0].isMyTurn
   players[1].isMyTurn = !players[1].isMyTurn
   console.log(players[0].isMyTurn ? "next Turn: Player 1" : "next Turn: Player 2")
   
   p1$$.classList.toggle("turn")
   p2$$.classList.toggle("turn")
+
 }
 
 //* MOVIMIENTOS
@@ -48,7 +74,15 @@ const moveIsPosible = (moveToCell) => {
   //que este vacia
   if (moveToCell.matches(".empty")) {
     players.forEach(player => {
-      player.isMyTurn && moveToCell.classList.replace("empty", player.color)
+      if (player.isMyTurn) {
+        //pinta el tablero
+        moveToCell.classList.replace("empty", player.color)
+        //modifica el array reflejando la ficha
+        const rowCell = moveToCell.id[0]
+        const colCell = moveToCell.id[1]
+        initialBoard[rowCell][colCell] = player.ficha
+        console.log(initialBoard)
+      }
     }) 
 
     //que este al lado de una ficha del color contratio
@@ -61,27 +95,6 @@ const move = (e) => {
   moveIsPosible(moveToCell) ? nextTurn() : wrongMove(moveToCell)}
 
 
-//*SCORE
-scoreP1.textContent = players[0].score
-scoreP2.textContent = players[1].score
-
-const updateScore = () => {
-  initialBoard.forEach(row => {
-    row.forEach(cell => {
-      if (cell !== 0 ||  3) {
-        cell === 1 ? players[0].score++  //player1 - whites
-        : cell === 2 && players[1].score++ //player2 - blacks
-      }
-    })
-  })
-}
-
-const paintScore = () => {
-  scoreP1$$.textContent = players[0].score
-  scoreP2$$.textContent = players[1].score
-}
-
-
 //*INICIAMOS TABLERO
 const paintBoard = (boardArray) => {
   boardArray.forEach((row, i) => {
@@ -91,7 +104,7 @@ const paintBoard = (boardArray) => {
 
     for (let j = 0; j < row.length; j++) {
       const cell$$ = document.createElement("span")
-      cell$$.id = `${i}-${j}`
+      cell$$.id = `${i}${j}`
       cell$$.className = "cell"
       row$$.appendChild(cell$$)
 
@@ -109,3 +122,5 @@ const paintBoard = (boardArray) => {
 }
 
 paintBoard(initialBoard)
+updateScore()
+paintScore()
